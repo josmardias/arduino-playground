@@ -6,10 +6,11 @@ int LED_WHITE = 9;
 int game_leds[] = {LED_RED, LED_YELLOW, LED_GREEN, LED_WHITE};
 int game_leds_length = sizeof game_leds / sizeof game_leds[0];
 
-int secret[4];
-int secret_length = sizeof secret / sizeof secret[0];
+int round_secret[10];
+int round_secret_length = sizeof round_secret / sizeof round_secret[0];
 
-int game_turn = -1;
+int game_round = -1;
+int round_turn = -1;
 
 void setup() {
   Serial.begin(9600);
@@ -23,8 +24,19 @@ void setup() {
 void loop() {
   delay(10);
 
-  if (game_turn < 0) {
+  if (game_round >= round_secret_length) {
+    game_victory();
+    return;
+  }
+
+  if (game_round < 0) {
     game_start();
+    return;
+  }
+
+  if (round_turn < 0) {
+    round_start();
+    return;
   }
 
   int led = read_pressed_led();
@@ -33,18 +45,17 @@ void loop() {
 
   Serial.println(led);
 
-  if (led != secret[game_turn]) {
-    Serial.println("game over!");
+  if (led != round_secret[round_turn]) {
     game_over();
     return;
   }
 
-  game_turn++;
-
-  if (game_turn == game_leds_length) {
-    Serial.println("win!");
-    game_victory();
+  if (round_turn == game_round) {
+    game_round_victory();
+    return;
   }
+
+  round_turn++;
 }
 
 int read_pressed_led() {
@@ -61,25 +72,8 @@ int read_pressed_led() {
 }
 
 void game_start() {
-  set_leds_output_mode();
-
-  show_reset_animation();
-
-  set_new_secret();
-
-  show_secret_animation();
-
-  set_leds_input_mode();
-
-  game_turn = 0;
-}
-
-void game_over() {
-  set_leds_output_mode();
-
-  show_reset_animation();
-
-  game_turn = -1;
+  game_round = 0;
+  round_turn = -1;
 }
 
 void game_victory() {
@@ -87,13 +81,47 @@ void game_victory() {
 
   show_victory_animation();
 
-  game_turn = -1;
+  game_round = -1;
 }
 
-void set_new_secret() {
-  for (int i = 0; i < secret_length; i++) {
+void round_start() {
+  set_leds_output_mode();
+
+  show_reset_animation();
+
+  set_new_round_secret();
+
+  show_round_secret_animation();
+
+  round_turn = 0;
+
+  set_leds_input_mode();
+}
+
+void game_over() {
+  Serial.println("game over!");
+  set_leds_output_mode();
+
+  show_reset_animation();
+
+  round_turn = -1;
+  game_round = -1;
+}
+
+void game_round_victory() {
+  Serial.println("round win!");
+  set_leds_output_mode();
+
+  show_round_victory_animation();
+
+  round_turn = -1;
+  game_round++;
+}
+
+void set_new_round_secret() {
+  for (int i = 0; i < round_secret_length; i++) {
     int rand_index = random(0, game_leds_length);
-    secret[i] = game_leds[rand_index];
+    round_secret[i] = game_leds[rand_index];
   }
 }
 
@@ -111,8 +139,8 @@ void show_reset_animation() {
   delay(1000);
 }
 
-void show_victory_animation() {
-  for (int j = 0; j < 3; j++) {
+void show_round_victory_animation() {
+  for (int j = 0; j < 2; j++) {
     for (int i = 0; i < game_leds_length; i++) {
       digitalWrite(game_leds[i], HIGH);
       delay(100);
@@ -121,12 +149,27 @@ void show_victory_animation() {
   }
 }
 
-void show_secret_animation() {
-  for (int i = 0; i < secret_length; i++) {
-    digitalWrite(secret[i], HIGH);
+void show_round_secret_animation() {
+  for (int i = 0; i < game_round + 1; i++) {
+    digitalWrite(round_secret[i], HIGH);
     delay(500);
-    digitalWrite(secret[i], LOW);
+    digitalWrite(round_secret[i], LOW);
     delay(50);
+  }
+}
+
+void show_victory_animation() {
+  for (int j = 0; j < 3; j++) {
+    for (int i = 0; i < game_leds_length; i++) {
+      digitalWrite(game_leds[i], HIGH);
+      delay(100);
+      digitalWrite(game_leds[i], LOW);
+    }
+    for (int i = 0; i < game_leds_length; i++) {
+      digitalWrite(game_leds[game_leds_length-i], HIGH);
+      delay(100);
+      digitalWrite(game_leds[game_leds_length-i], LOW);
+    }
   }
 }
 
