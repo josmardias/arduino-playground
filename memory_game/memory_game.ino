@@ -6,8 +6,8 @@ int LED_WHITE = 9;
 int game_leds[] = {LED_RED, LED_YELLOW, LED_GREEN, LED_WHITE};
 int game_leds_count = sizeof game_leds / sizeof game_leds[0];
 
-int order[] = {LED_RED, LED_WHITE, LED_YELLOW, LED_GREEN};
-int order_count = sizeof order / sizeof order[0];
+int secret[4];
+int secret_count = sizeof secret / sizeof secret[0];
 
 int game_turn = -1;
 
@@ -33,7 +33,7 @@ void loop() {
 
   Serial.println(led);
 
-  if (led != order[game_turn]) {
+  if (led != secret[game_turn]) {
     Serial.println("game over!");
     game_over();
     return;
@@ -65,9 +65,9 @@ void game_start() {
 
   show_reset_animation();
 
-  set_new_order();
+  set_new_secret();
 
-  show_order_animation();
+  show_secret_animation();
 
   set_leds_input_mode();
 
@@ -90,10 +90,10 @@ void game_victory() {
   game_turn = -1;
 }
 
-void set_new_order() {
-  for (int i = 0; i < order_count; i++) {
+void set_new_secret() {
+  for (int i = 0; i < secret_count; i++) {
     int rand_index = random(0, game_leds_count);
-    order[i] = game_leds[rand_index];
+    secret[i] = game_leds[rand_index];
   }
 }
 
@@ -121,11 +121,11 @@ void show_victory_animation() {
   }
 }
 
-void show_order_animation() {
-  for (int i = 0; i < order_count; i++) {
-    digitalWrite(order[i], HIGH);
+void show_secret_animation() {
+  for (int i = 0; i < secret_count; i++) {
+    digitalWrite(secret[i], HIGH);
     delay(500);
-    digitalWrite(order[i], LOW);
+    digitalWrite(secret[i], LOW);
     delay(50);
   }
 }
