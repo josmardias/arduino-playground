@@ -131,13 +131,13 @@ void show_order_animation() {
 }
 
 void set_leds_output_mode() {
-  for (int i = 0; i < order_count; i++) {
+  for (int i = 0; i < game_leds_count; i++) {
     pinMode(game_leds[i], OUTPUT);
   }
 }
 
 void set_leds_input_mode() {
-  for (int i = 0; i < order_count; i++) {
+  for (int i = 0; i < game_leds_count; i++) {
     pinMode(game_leds[i], INPUT);
   }
 }
