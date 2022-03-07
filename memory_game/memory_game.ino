@@ -72,6 +72,7 @@ int read_pressed_led() {
 }
 
 void game_start() {
+  set_new_round_secret();
   game_round = 0;
   round_turn = -1;
 }
@@ -88,8 +89,6 @@ void round_start() {
   set_leds_output_mode();
 
   show_reset_animation();
-
-  set_new_round_secret();
 
   show_round_secret_animation();
 
